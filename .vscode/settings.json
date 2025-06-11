@@ -1,0 +1,15 @@
+{
+    "C_Cpp.intelliSenseEngine": "default",
+    "idf.espIdfPathWin": "c:\\Espressif\\v5.4\\esp-idf",
+    "idf.openOcdConfigs": [
+        "board/esp32c3-bridge.cfg"
+    ],
+    "idf.toolsPathWin": "C:\\Espressif\\tools",
+    "idf.portWin": "COM4",
+    "idf.flashType": "UART",
+    "idf.pythonInstallPath": "/usr/bin/python3",
+    "idf.customExtraVars": {
+        "IDF_TARGET": "esp32c3"
+    },
+    "idf.port": "/dev/tty.usbmodem112401"
+}

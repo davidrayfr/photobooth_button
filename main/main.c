@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+
+#include "driver/gpio.h"
+#include "esp_log.h"
+#include "led_strip.h"
+#include "sdkconfig.h"
+
+#include "esp_system.h"
+#include "esp_wifi.h"
+#include "esp_event.h"
+#include "nvs_flash.h"
+#include "esp_bt.h"
+
+#include "esp_hidd_prf_api.h"
+#include "esp_bt_defs.h"
+#include "esp_gap_ble_api.h"
+#include "esp_gatts_api.h"
+#include "esp_gatt_defs.h"
+#include "esp_bt_main.h"
+#include "esp_bt_device.h"
+#include "driver/gpio.h"
+#include "hid_dev.h"
+
+#include "esp_pm.h"
+#include "esp_sleep.h"
+#include "esp_idf_version.h"
+
+#include "iot_button.h"
+
+// project for Led and button
+// GPIO X for the LED
+// GPIO X for the button (linked to ground)
+#define LED_GPIO 4
+#define BUTTON_GPIO         3
+#define BUTTON_ACTIVE_LEVEL     0
+//#define CONFIG_BUTTON_LONG_PRESS_TIME_MS 3000 in idf.py menuconfig
+//#define CONFIG_BUTTON_SHORT_PRESS_TIME_MS 500 in idf.py menuconfig
+
+//Period in mseconds for blink
+#define CONFIG_BLINK_PERIOD 250
+
+static uint8_t s_led_state = 0;
+
+static const char *TAG = "example";
+
+static void configure_led(void)
+{
+    ESP_LOGI(TAG, "Example configured to blink GPIO LED!");
+    gpio_reset_pin(LED_GPIO);
+    /* Set the GPIO as a push/pull output */
+    gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
+}
+
+static void blink_led(void)
+{
+    /* Set the GPIO level according to the state (LOW or HIGH)*/
+    gpio_set_level(LED_GPIO, s_led_state);
+}
+
+static void button_event_cb(void *arg, void *data)
+{
+    iot_button_print_event((button_handle_t)arg);
+    /*esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
+    if (cause != ESP_SLEEP_WAKEUP_UNDEFINED) {
+        ESP_LOGI(TAG, "Wake up from light sleep, reason %d", cause);
+    }*/
+}
+
+void button_init(uint32_t button_num)
+{
+    button_config_t btn_cfg = {
+        .type = BUTTON_TYPE_GPIO,
+        .gpio_button_config = {
+            .gpio_num = button_num,
+            .active_level = BUTTON_ACTIVE_LEVEL,
+            //.enable_power_save = true,
+        },
+    };
+
+    button_handle_t btn = iot_button_create(&btn_cfg);
+    assert(btn);
+    esp_err_t err = iot_button_register_cb(btn, BUTTON_PRESS_DOWN, button_event_cb, NULL);
+    err |= iot_button_register_cb(btn, BUTTON_PRESS_UP, button_event_cb, NULL);
+    err |= iot_button_register_cb(btn, BUTTON_PRESS_REPEAT, button_event_cb, NULL);
+    err |= iot_button_register_cb(btn, BUTTON_PRESS_REPEAT_DONE, button_event_cb, NULL);
+    err |= iot_button_register_cb(btn, BUTTON_SINGLE_CLICK, button_event_cb, NULL);
+    err |= iot_button_register_cb(btn, BUTTON_DOUBLE_CLICK, button_event_cb, NULL);
+    err |= iot_button_register_cb(btn, BUTTON_LONG_PRESS_START, button_event_cb, NULL);
+    err |= iot_button_register_cb(btn, BUTTON_LONG_PRESS_HOLD, button_event_cb, NULL);
+    err |= iot_button_register_cb(btn, BUTTON_LONG_PRESS_UP, button_event_cb, NULL);
+    err |= iot_button_register_cb(btn, BUTTON_PRESS_END, button_event_cb, NULL);
+
+    ESP_ERROR_CHECK(err);
+}
+
+void button_enter_power_save(void *usr_data)
+{
+    ESP_LOGI(TAG, "Can enter power save now");
+    esp_light_sleep_start();
+}
+
+/*only LED managed in Main
+Button will be managed as interupt*/
+
+void app_main(void)
+{
+/* Configure the peripheral according to the LED type */
+    configure_led();
+    button_init(BUTTON_GPIO);
+
+    while (1) {
+        ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
+        blink_led();
+        /* Toggle the LED state */
+        s_led_state = !s_led_state;
+        vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS);
+    }
+}
