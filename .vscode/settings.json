@@ -7,7 +7,7 @@
     "idf.toolsPathWin": "C:\\Espressif\\tools",
     "idf.portWin": "COM4",
     "idf.flashType": "UART",
-    "idf.pythonInstallPath": "/usr/bin/python3",
+    "idf.pythonInstallPath": "C:\\Espressif\\tools\\tools\\idf-python\\3.11.2\\python.exe",
     "idf.customExtraVars": {
         "IDF_TARGET": "esp32c3"
     },
