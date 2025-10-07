@@ -46,3 +46,4 @@ Si pas de Bluetooth - clignote lentement - Arret au bout de 5 min
 Si bluetooth - Allumé
 Si recherche bluethooth - cligote rapide - Arret au bout de 5 min
 
+First Commit for the test
