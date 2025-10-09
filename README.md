@@ -47,3 +47,5 @@ Si bluetooth - Allumé
 Si recherche bluethooth - cligote rapide - Arret au bout de 5 min
 
 test de commit avec GITHUB
+
+2eme test avec MaC
