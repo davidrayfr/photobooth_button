@@ -11,5 +11,6 @@
     "idf.customExtraVars": {
         "IDF_TARGET": "esp32c3"
     },
-    "idf.port": "/dev/tty.usbmodem112401"
+    "idf.port": "/dev/tty.usbmodem112401",
+    "idf.currentSetup": "c:\\Espressif\\v5.4\\esp-idf"
 }
